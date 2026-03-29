@@ -1,0 +1,18 @@
+/**
+ * Prisma Client Singleton — Prisma v5 compatible
+ * @samsic-data-model — Pattern recommandé Next.js/Vercel
+ * Évite les connexions multiples en mode développement (hot-reload)
+ */
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;

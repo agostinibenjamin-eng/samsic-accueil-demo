@@ -1,0 +1,155 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --samsic-marine: #24303b;
+    --samsic-marine-80: #5c666e;
+    --samsic-marine-50: #999ea3;
+    --samsic-marine-30: #c2c4c7;
+    --samsic-sable: #bfa894;
+    --samsic-sable-80: #ccbaab;
+    --samsic-sable-50: #ded4c9;
+    --samsic-sable-30: #ede5de;
+    --samsic-bleu: #0078b0;
+    --samsic-bleu-80: #3391c2;
+    --samsic-bleu-50: #80bad6;
+    --samsic-bleu-30: #cce3f0;
+    
+    --color-success: #2E7D32;
+    --color-success-bg: #E8F5E9;
+    --color-warning: #E87A1E;
+    --color-warning-bg: #FFF3E0;
+    --color-danger: #C62828;
+    --color-danger-bg: #FFEBEE;
+    --color-simulation: #6B21A8;
+    --color-simulation-bg: #F3E5F5;
+
+    --bg-page: #F4F7FE; /* Très clair */
+    --bg-card: #FFFFFF;
+    --bg-sidebar: #FFFFFF; /* Sidebar blanche pour contraster */
+    --text-primary: #2b3643;
+    --text-secondary: #707EAE;
+    --text-tertiary: #A3AED0;
+    --text-on-dark: #FFFFFF;
+    --border-default: #E2E8F0;
+    --border-strong: #CBD5E1;
+
+    /* Shadcn mapping */
+    --background: 228 33% 97%; /* #F4F7FE très clair bleuté */
+    --foreground: 210 24% 19%; /* marine */
+    --card: 0 0% 100%;
+    --card-foreground: 210 24% 19%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 24% 19%;
+    --primary: 210 24% 19%; /* marine */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 210 24% 19%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 209 9% 40%;
+    --accent: 200 100% 35%; /* bleu */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 66% 47%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 24% 19%; 
+    --radius: 1rem; /* Bords beaucoup plus arrondis (rounded-2xl) */
+    
+    /* Soft shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-[var(--bg-page)] text-[var(--text-primary)] font-body;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading text-[var(--text-primary)];
+  }
+}
+
+/* ── Micro-animations SAMSIC ──────────────────────────────────────── */
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Entrée échelonnée pour les cards */
+.stagger-item {
+  animation: slideInUp 0.35s ease forwards;
+  opacity: 0;
+}
+.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+.stagger-item:nth-child(2) { animation-delay: 0.10s; }
+.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+.stagger-item:nth-child(4) { animation-delay: 0.20s; }
+.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+.stagger-item:nth-child(6) { animation-delay: 0.30s; }
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--samsic-sable-30) 25%,
+    var(--samsic-sable-50) 50%,
+    var(--samsic-sable-30) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* ── Impression SAMSIC ──────────────────────────────────────── */
+@page {
+  size: landscape;
+  margin: 1cm;
+}
+
+@media print {
+  html, body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: white !important;
+  }
+  
+  /* Retirer les ombres inutiles à l'impression */
+  .shadow-sm {
+    box-shadow: none !important;
+    border: 1px solid var(--border-default) !important;
+  }
+}

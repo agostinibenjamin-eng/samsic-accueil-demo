@@ -1,0 +1,45 @@
+# ==========================================
+# Samsic Accueil — .gitignore
+# @vercel-deployment — secrets jamais committé
+# ==========================================
+
+# Node
+node_modules/
+.npm
+
+# Next.js
+.next/
+out/
+build/
+
+# Prisma generated
+prisma/generated/
+
+# Env files — JAMAIS dans Git
+.env
+.env.local
+.env.*.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Vercel
+.vercel
+
+# Test coverage
+coverage/

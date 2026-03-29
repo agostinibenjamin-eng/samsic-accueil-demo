@@ -1,0 +1,136 @@
+// @samsic-data-model — Schéma Prisma 5 pour Supabase PostgreSQL (Vercel)
+// Version prototype V0 — enrichi en V1 (voir 03-DATA-MODEL.md)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")      // pgbouncer - connection pooling (port 6543)
+  directUrl = env("DIRECT_URL")         // direct - pour prisma db push/migrate (port 5432)
+}
+
+// ==================== ENUMS ====================
+
+enum EmployeeType {
+  TITULAR
+  BACKUP
+  TEAM_LEADER
+}
+
+enum AssignmentStatus {
+  CONFIRMED        // Titulaire confirmé — vert
+  TRAINED_BACKUP   // Backup formé — bleu
+  UNTRAINED_BACKUP // Backup à former — orange
+  UNCOVERED        // Non couvert — rouge
+  SIMULATION       // Mode simulation — violet
+}
+
+enum AlertSeverity {
+  CRITICAL // Rouge — action immédiate requise
+  WARNING  // Orange — action requise aujourd'hui
+  INFO     // Bleu — information
+}
+
+// ==================== MODELS ====================
+
+model Employee {
+  id                 String       @id @default(cuid())
+  employeeCode       String       @unique
+  firstName          String
+  lastName           String
+  employeeType       EmployeeType
+  languages          String[]     // ['fr', 'en', 'de', 'lu', 'pt']
+  skills             String[]     // ['standard_telephonique', 'accueil_vip']
+  trainedPostIds     String[]     // IDs des postes où l'employé est formé
+  preferredClientIds String[]     // IDs des clients préférés
+  weeklyHours        Float        @default(40)
+  isActive           Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  assignments Assignment[]
+  absences    Absence[]
+
+  @@index([isActive])
+  @@index([employeeType])
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  industry  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  posts Post[]
+
+  @@index([isActive])
+}
+
+model Post {
+  id                String   @id @default(cuid())
+  clientId          String
+  client            Client   @relation(fields: [clientId], references: [id])
+  name              String   // "Réception A", "Mailroom"
+  startTime         String   // "08:00"
+  endTime           String   // "17:00"
+  requiredLanguages String[]
+  criticalLanguage  String?  // Langue absolument critique (éliminatoire)
+  requiredSkills    String[]
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+
+  assignments Assignment[]
+
+  @@unique([clientId, name])
+  @@index([clientId])
+}
+
+model Assignment {
+  id          String           @id @default(cuid())
+  employeeId  String
+  employee    Employee         @relation(fields: [employeeId], references: [id])
+  postId      String
+  post        Post             @relation(fields: [postId], references: [id])
+  date        DateTime         @db.Date
+  status      AssignmentStatus @default(CONFIRMED)
+  aiSuggested Boolean          @default(false)
+  aiScore     Float?           // Score IA au moment de l'affectation (0-100)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([postId, date]) // Un poste = 1 affectation max par jour
+  @@index([date])
+  @@index([employeeId])
+  @@index([postId])
+}
+
+model Absence {
+  id          String   @id @default(cuid())
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  startDate   DateTime @db.Date
+  endDate     DateTime @db.Date
+  reason      String?
+  createdAt   DateTime @default(now())
+
+  @@index([employeeId])
+  @@index([startDate, endDate])
+}
+
+model Alert {
+  id          String        @id @default(cuid())
+  severity    AlertSeverity
+  title       String
+  description String
+  clientId    String?
+  postId      String?
+  date        DateTime?     @db.Date
+  isResolved  Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  @@index([isResolved, severity])
+  @@index([createdAt])
+}
