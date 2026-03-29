@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { rankSuggestions } from '@/lib/ai/scoring-engine';
-import type { EmployeeProfile, ScoringContext, LangueCode, PostRequirements } from '../../../../../../packages/shared/src/types/ai-engine';
+import type { EmployeeProfile, ScoringContext, LangueCode, PostRequirements } from '@/types/ai-engine';
 
 export async function POST(req: NextRequest) {
   try {
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
       assignmentMap.set(key, a);
     }
 
-    const strategies: import('../../../../../../packages/shared/src/types/ai-engine').OptimizationStrategy[] = ['OPTIMIZE_COSTS', 'BALANCED', 'MAXIMIZE_SATISFACTION'];
+    const strategies: import('@/types/ai-engine').OptimizationStrategy[] = ['OPTIMIZE_COSTS', 'BALANCED', 'MAXIMIZE_SATISFACTION'];
     const scenarios = [];
 
     for (const strategy of strategies) {

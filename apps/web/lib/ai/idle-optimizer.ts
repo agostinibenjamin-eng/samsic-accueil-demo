@@ -16,7 +16,7 @@ import type {
   IdleTimeReport,
   TurnoverAlert,
   PostTraining,
-} from '../../../../packages/shared/src/types/ai-engine';
+} from '@/types/ai-engine';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 

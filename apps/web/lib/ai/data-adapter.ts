@@ -7,7 +7,7 @@
  */
 
 import type { EmployeeFullProfile } from '@/lib/data/employees-data';
-import type { EmployeeProfile, PostRequirements, PostTraining, LanguageSkill } from '../../../../packages/shared/src/types/ai-engine';
+import type { EmployeeProfile, PostRequirements, PostTraining, LanguageSkill } from '@/types/ai-engine';
 
 /**
  * Convertit un EmployeeFullProfile (données statiques) 

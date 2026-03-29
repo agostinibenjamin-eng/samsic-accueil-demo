@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { EMPLOYEES_DATA } from '@/lib/data/employees-data';
 import { toEmployeeProfile, normalizePostId, buildPostRequirements } from '@/lib/ai/data-adapter';
 import { scoreEmployee, rankSuggestions, solveCascade } from '@/lib/ai/scoring-engine';
-import type { EmployeeProfile, PostRequirements, ScoringContext } from '../../../../../../packages/shared/src/types/ai-engine';
+import type { EmployeeProfile, PostRequirements, ScoringContext } from '@/types/ai-engine';
 import { prisma } from '@/lib/prisma';
 
 // ─── Client post overrides (données métier pour le proto) ────────────────────

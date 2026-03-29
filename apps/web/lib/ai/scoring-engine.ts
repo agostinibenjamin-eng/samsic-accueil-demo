@@ -16,7 +16,7 @@ import type {
   Shift,
   LanguageLevel,
   LanguageRequirement,
-} from '../../../../packages/shared/src/types/ai-engine';
+} from '@/types/ai-engine';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 

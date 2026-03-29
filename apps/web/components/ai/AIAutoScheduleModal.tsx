@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Calendar, X, CheckCircle2, AlertTriangle, Zap, RotateCw, ChevronRight, Euro, HeartHandshake, Scale } from 'lucide-react';
-import type { ScenarioResult } from '../../../../packages/shared/src/types/ai-engine';
+import type { ScenarioResult } from '@/types/ai-engine';
 
 interface AIAutoScheduleModalProps {
   isOpen: boolean;

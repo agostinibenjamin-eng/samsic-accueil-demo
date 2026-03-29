@@ -1,7 +1,7 @@
 import { expect, test, describe } from 'vitest';
 import { scoreEmployee, rankSuggestions, hasTimeConflict, checkLegalRest11h, solveCascade } from '../scoring-engine';
 import { calculatePostFragility, getTrainingSuggestions, getTurnoverAlerts, getIdleTimeReport } from '../idle-optimizer';
-import type { EmployeeProfile, PostRequirements, ScoringContext, Shift } from '../../../../../packages/shared/src/types/ai-engine';
+import type { EmployeeProfile, PostRequirements, ScoringContext, Shift } from '@/types/ai-engine';
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
