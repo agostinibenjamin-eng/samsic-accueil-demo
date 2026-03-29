@@ -110,8 +110,11 @@ export function PlanningGrid({
   const [isSimulation, setIsSimulation] = useState(false);
   const [showWeekend, setShowWeekend] = useState(false);
 
-  // Calcul des dates
-  const visibleDays = useMemo(() => getDaysInRange(startDate, endDate), [startDate, endDate]);
+  const visibleDays = useMemo(() => {
+    const days = getDaysInRange(startDate, endDate);
+    // Exclusion systématique des dimanches selon la règle métier
+    return days.filter(d => d.getDay() !== 0);
+  }, [startDate, endDate]);
 
   // Index des affectations par postId+date pour lookup O(1)
   const assignmentIndex = useMemo(() => {
@@ -135,10 +138,10 @@ export function PlanningGrid({
   const goToNextWeek = () => shiftPeriod(7);
 
   const goToToday = useCallback(() => {
-    const today = new Date('2026-03-28T00:00:00.000Z'); // Date fixe démo
+    const today = new Date(); // Date dynamique
     const diff = endDate.getTime() - startDate.getTime();
     const monday = new Date(today);
-    monday.setUTCDate(today.getUTCDate() - today.getUTCDay() + 1);
+    monday.setUTCDate(today.getUTCDate() - today.getUTCDay() + (today.getUTCDay() === 0 ? -6 : 1));
     const newEnd = new Date(monday.getTime() + diff);
     onPeriodChange(monday, newEnd);
   }, [startDate, endDate, onPeriodChange]);

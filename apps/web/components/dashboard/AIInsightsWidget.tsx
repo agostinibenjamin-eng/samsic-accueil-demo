@@ -37,7 +37,7 @@ export function AIInsightsWidget() {
     const active = employees.filter(e => e.isActive);
     const totalContract = active.reduce((s, e) => s + e.weeklyContractHours, 0);
     const totalAssigned = active.reduce((s, e) => s + e.weeklyAssignedHours, 0);
-    const occupancyRate = totalContract > 0 ? Math.round((totalAssigned / totalContract) * 100) : 0;
+    const occupancyRate = totalContract > 0 ? Math.min(100, Math.round((totalAssigned / totalContract) * 100)) : 0;
     const idleHours = totalContract - totalAssigned;
     const idleCost = Math.round(idleHours * 16); // coût moyen estimé
 

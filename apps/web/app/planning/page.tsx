@@ -22,9 +22,19 @@ interface SelectedCell {
 }
 
 export default function PlanningPage() {
-  // Période démo
-  const [startDate, setStartDate] = useState<Date>(new Date('2026-03-23'));
-  const [endDate, setEndDate] = useState<Date>(new Date('2026-03-29'));
+  // Calcule dynamiquement le lundi de la semaine en cours
+  const [startDate, setStartDate] = useState<Date>(() => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // ajuster à lundi
+    return new Date(d.getFullYear(), d.getMonth(), diff);
+  });
+  const [endDate, setEndDate] = useState<Date>(() => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1) + 6; // dimanche
+    return new Date(d.getFullYear(), d.getMonth(), diff);
+  });
   
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [employees, setEmployees] = useState<{ id: string; firstName: string; lastName: string }[]>([]);
