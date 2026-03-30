@@ -21,6 +21,13 @@ interface SelectedCell {
   date: string;
 }
 
+const toLocalISOString = (d: Date) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function PlanningPage() {
   // Calcule dynamiquement le lundi de la semaine en cours
   const [startDate, setStartDate] = useState<Date>(() => {
@@ -59,8 +66,8 @@ export default function PlanningPage() {
   const fetchPlanningData = useCallback(async (start: Date, end: Date) => {
     setIsLoadingData(true);
     try {
-      const startStr = start.toISOString().split('T')[0];
-      const endStr = end.toISOString().split('T')[0];
+      const startStr = toLocalISOString(start);
+      const endStr = toLocalISOString(end);
       const [clientsRes, planningRes, empRes] = await Promise.all([
         fetch('/api/clients', { cache: 'no-store' }),
         fetch(`/api/planning?startDate=${startStr}&endDate=${endStr}&t=${Date.now()}`, { cache: 'no-store' }),
@@ -309,7 +316,7 @@ export default function PlanningPage() {
       {/* AI Reorg Panel — Suggestions réorganisation planning */}
       <AIReorgPanel
         isOpen={isReorgOpen}
-        weekStart={startDate.toISOString().split('T')[0]}
+        weekStart={toLocalISOString(startDate)}
         onClose={() => setIsReorgOpen(false)}
         onComplete={() => fetchPlanningData(startDate, endDate)}
       />

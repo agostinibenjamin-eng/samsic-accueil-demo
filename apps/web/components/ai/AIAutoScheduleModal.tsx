@@ -11,16 +11,23 @@ interface AIAutoScheduleModalProps {
   onComplete: () => void;
 }
 
+const toLocalISOString = (d: Date) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export function AIAutoScheduleModal({ isOpen, currentDate, onClose, onComplete }: AIAutoScheduleModalProps) {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   
   useEffect(() => {
     if (isOpen) {
-      setStartDate(currentDate.toISOString().split('T')[0]);
+      setStartDate(toLocalISOString(currentDate));
       const end = new Date(currentDate);
-      end.setUTCDate(end.getUTCDate() + 6);
-      setEndDate(end.toISOString().split('T')[0]);
+      end.setDate(end.getDate() + 6);
+      setEndDate(toLocalISOString(end));
       setMode('FILL_GAPS');
       setStep('SETUP');
     }

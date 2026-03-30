@@ -36,6 +36,13 @@ const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string }> 
   OTHER:       { label: 'Autre',       color: 'text-samsic-marine-50', bg: 'bg-white border-samsic-sable-50' },
 };
 
+const toLocalISOString = (d: Date) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 function DeclareModal({ onClose, onDeclare }: {
   onClose: () => void;
   onDeclare: () => void;
@@ -43,8 +50,8 @@ function DeclareModal({ onClose, onDeclare }: {
   const [step, setStep] = useState<'form' | 'saving' | 'done'>('form');
   const [type, setType] = useState<AbsenceType>('SICK_LEAVE');
   const [employeeId, setEmployeeId] = useState('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(toLocalISOString(new Date()));
+  const [endDate, setEndDate] = useState(toLocalISOString(new Date()));
   
   const [employees, setEmployees] = useState<{id: string, firstName: string, lastName: string}[]>([]);
 
