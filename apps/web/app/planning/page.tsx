@@ -211,7 +211,7 @@ export default function PlanningPage() {
       }
       return a;
     });
-  }, [assignments, employeeId, absences]);
+  }, [mergedAssignments, employeeId, absences]);
 
   // Computed state pour le filtrage
   const filteredClients = useMemo(() => {
@@ -245,7 +245,7 @@ export default function PlanningPage() {
 
         // Si on cherche un employé, il faut qu'il soit sur ce poste
         if (employeeId !== 'ALL') {
-           const hasEmployee = assignments.some(a => a.postId === p.id && a.employeeId === employeeId);
+           const hasEmployee = mergedAssignments.some(a => a.postId === p.id && a.employeeId === employeeId);
            if (!hasEmployee) return false;
         }
 
@@ -264,7 +264,7 @@ export default function PlanningPage() {
       if (category !== 'ALL' && c.industry !== category) return false;
       return true;
     });
-  }, [clients, clientId, category, searchQuery, employeeId, showIssuesOnly, filteredAssignments, assignments, startDate, endDate]);
+  }, [clients, clientId, category, searchQuery, employeeId, showIssuesOnly, filteredAssignments, mergedAssignments, startDate, endDate]);
 
   return (
     <div className="flex h-full w-full overflow-hidden print:overflow-visible print:bg-white">
