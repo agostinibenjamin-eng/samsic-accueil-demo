@@ -67,6 +67,9 @@ interface PlanningGridProps {
   onSimulationAccept?: (assignment: AssignmentData) => void;
   onReorgClick?: () => void;
   onAutoScheduleClick?: () => void;
+  pendingCount?: number;
+  isSaving?: boolean;
+  onSave?: () => void;
 }
 
 // ==================== HELPERS ====================
@@ -106,6 +109,9 @@ export function PlanningGrid({
   onCellClick,
   onReorgClick,
   onAutoScheduleClick,
+  pendingCount = 0,
+  isSaving = false,
+  onSave,
 }: PlanningGridProps) {
   const [isSimulation, setIsSimulation] = useState(false);
   const [showWeekend, setShowWeekend] = useState(false);
@@ -296,6 +302,22 @@ export function PlanningGrid({
               <Download size={13} className="text-white" />
               Export
             </button>
+
+            {/* Save Button for Pending Edits */}
+            {pendingCount > 0 && onSave && (
+              <button
+                onClick={onSave}
+                disabled={isSaving}
+                className="px-4 h-8 flex items-center gap-2 bg-emerald-600 text-white text-xs font-bold font-body shadow-sm hover:bg-emerald-700 transition-all rounded ml-2 relative"
+              >
+                {isSaving ? (
+                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                ) : (
+                   <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+                )}
+                {isSaving ? 'Enregistrement...' : `Enregistrer le planning (${pendingCount})`}
+              </button>
+            )}
 
             {/* AI Auto Schedule Button */}
             <button

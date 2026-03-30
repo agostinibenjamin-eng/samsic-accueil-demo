@@ -52,6 +52,9 @@ export default function PlanningPage() {
   const [isReorgOpen, setIsReorgOpen] = useState(false);
   const [isAutoScheduleOpen, setIsAutoScheduleOpen] = useState(false);
 
+  const [pendingAssignments, setPendingAssignments] = useState<Record<string, AssignmentData>>({});
+  const [isSaving, setIsSaving] = useState(false);
+
   // Fetch données planning
   const fetchPlanningData = useCallback(async (start: Date, end: Date) => {
     setIsLoadingData(true);
@@ -86,6 +89,8 @@ export default function PlanningPage() {
 
   useEffect(() => {
     fetchPlanningData(startDate, endDate);
+    // On efface les pending quand on change de semaine
+    setPendingAssignments({});
   }, [startDate, endDate, fetchPlanningData]);
 
   const handlePeriodChange = useCallback(
@@ -108,35 +113,82 @@ export default function PlanningPage() {
   }, []);
 
   const handleAccept = useCallback(
-    async (employeeId: string, _code: string, score: number) => {
+    (employeeId: string, _code: string, score: number) => {
       if (!selectedCell) return;
-      try {
-        await fetch('/api/planning', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            employeeId,
-            postId: selectedCell.postId,
-            date: selectedCell.date,
-            status: 'CONFIRMED',
-            aiSuggested: true,
-            aiScore: score,
-          }),
-        });
-      } catch (err) {
-        console.error('Erreur affectation AI:', err);
-      } finally {
-        setSelectedCell(null);
-        fetchPlanningData(startDate, endDate);
-      }
+      
+      const emp = employees.find(e => e.id === employeeId);
+      if (!emp) return;
+
+      const dateStr = selectedCell.date; // already YYYY-MM-DD
+      const newAssignment: AssignmentData = {
+        id: `pending-${Date.now()}`,
+        postId: selectedCell.postId,
+        date: dateStr + 'T00:00:00.000Z',
+        status: 'CONFIRMED',
+        employeeId,
+        aiScore: score,
+        employee: {
+          id: emp.id,
+          firstName: emp.firstName,
+          lastName: emp.lastName,
+          employeeType: 'TITULAR',
+        },
+        post: {
+          id: selectedCell.postId,
+          clientId: selectedCell.clientId,
+        }
+      };
+
+      setPendingAssignments(prev => {
+        const key = `${selectedCell.postId}|${dateStr}`;
+        return { ...prev, [key]: newAssignment };
+      });
+      setSelectedCell(null);
     },
-    [startDate, endDate, fetchPlanningData, selectedCell]
+    [selectedCell, employees]
   );
+
+  const handleSavePlanning = async () => {
+    const pendingList = Object.values(pendingAssignments);
+    if (pendingList.length === 0) return;
+    
+    setIsSaving(true);
+    try {
+      await fetch('/api/planning/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignments: pendingList }),
+      });
+      setPendingAssignments({});
+      await fetchPlanningData(startDate, endDate);
+    } catch (err) {
+      console.error('Erreur sauvegarde globale:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const mergedAssignments = useMemo(() => {
+     let list = [...assignments];
+     const pendingKeys = Object.keys(pendingAssignments);
+     
+     if (pendingKeys.length > 0) {
+        // Enlève ceux qui ont été écrasés
+        list = list.filter(a => {
+            const key = `${a.postId}|${a.date.split('T')[0]}`;
+            return !pendingAssignments[key];
+        });
+        // Ajoute les nouveaux
+        list.push(...Object.values(pendingAssignments));
+     }
+     
+     return list;
+  }, [assignments, pendingAssignments]);
 
   const filteredAssignments = useMemo(() => {
     let list = employeeId !== 'ALL' 
-      ? assignments.filter(a => a.employeeId === employeeId) 
-      : assignments;
+      ? mergedAssignments.filter(a => a.employeeId === employeeId) 
+      : mergedAssignments;
 
     return list.map(a => {
       const aDate = new Date(a.date).toISOString().split('T')[0];
@@ -248,6 +300,9 @@ export default function PlanningPage() {
           onCellClick={handleCellClick}
           onReorgClick={() => setIsReorgOpen(true)}
           onAutoScheduleClick={() => setIsAutoScheduleOpen(true)}
+          pendingCount={Object.keys(pendingAssignments).length}
+          onSave={handleSavePlanning}
+          isSaving={isSaving}
         />
       </main>
 
