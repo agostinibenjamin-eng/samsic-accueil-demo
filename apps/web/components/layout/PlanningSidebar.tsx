@@ -18,6 +18,8 @@ interface PlanningSidebarProps {
   onCategoryChange: (category: string) => void;
   clientsList: { id: string; name: string }[];
   employeesList: { id: string; firstName: string; lastName: string }[];
+  showIssuesOnly: boolean;
+  onShowIssuesOnlyChange: (show: boolean) => void;
 }
 
 export function PlanningSidebar({ 
@@ -34,7 +36,9 @@ export function PlanningSidebar({
   category,
   onCategoryChange,
   clientsList,
-  employeesList
+  employeesList,
+  showIssuesOnly,
+  onShowIssuesOnlyChange
 }: PlanningSidebarProps) {
   return (
     <aside className="w-64 bg-white border-r border-gray-100 flex flex-col h-full flex-shrink-0 shadow-sm z-20 overflow-y-auto">
@@ -74,11 +78,23 @@ export function PlanningSidebar({
               onClientFilterChange('ALL');
               onEmployeeFilterChange('ALL');
               onCategoryChange('ALL');
+              onShowIssuesOnlyChange(false);
             }}
             className="text-[10px] text-samsic-bleu font-bold bg-samsic-bleu/10 px-2 py-1 rounded-full hover:bg-samsic-bleu/20 transition-colors"
           >
             Réinitialiser
           </button>
+        </div>
+
+        {/* Show Issues Only Toggle */}
+        <div className="bg-red-50/50 border border-red-100 rounded-xl p-3 flex items-start gap-3 cursor-pointer hover:bg-red-50 transition-colors" onClick={() => onShowIssuesOnlyChange(!showIssuesOnly)}>
+          <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${showIssuesOnly ? 'bg-red-500 border-red-500' : 'bg-white border-red-200'}`}>
+            {showIssuesOnly && <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-red-800 uppercase tracking-wider leading-tight mb-0.5">Focus Problèmes</p>
+            <p className="text-[10px] text-red-600/80 leading-tight">Postes non couverts & Absences</p>
+          </div>
         </div>
 
         {/* Global Search */}

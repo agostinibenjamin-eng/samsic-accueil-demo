@@ -58,13 +58,18 @@ export const PlanningCell = React.memo(function PlanningCell({
 
   const s = CELL_STYLES[effectiveStatus];
   const showWarning = effectiveStatus === 'UNTRAINED_BACKUP';
+  const isAbsent = effectiveStatus === 'ABSENT';
 
   return (
     <div className="h-full w-full p-1.5 min-h-[5.5rem] print:break-inside-avoid">
       <button
         onClick={onClick}
-        className="w-full h-full flex flex-col gap-1.5 p-3 rounded-xl transition-all hover:scale-[0.98] text-left shadow-sm border"
-        style={{ backgroundColor: 'white', borderColor: s.border }}
+        className={`w-full h-full flex flex-col gap-1.5 p-3 rounded-xl transition-all hover:scale-[0.98] text-left shadow-sm border ${isAbsent ? 'ring-2 ring-red-400/50' : ''}`}
+        style={{ 
+          backgroundColor: 'white', 
+          borderColor: isAbsent ? '#fca5a5' : s.border,
+          backgroundImage: isAbsent ? 'repeating-linear-gradient(45deg, #fff5f5, #fff5f5 10px, #fee2e2 10px, #fee2e2 20px)' : 'none'
+        }}
         title={`${data.employeeName ?? 'Non affecté'} — ${s.label}`}
       >
         <div className="flex items-center justify-between w-full h-8">

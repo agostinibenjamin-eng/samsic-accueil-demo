@@ -46,6 +46,7 @@ export default function PlanningPage() {
   const [clientId, setClientId] = useState('ALL');
   const [employeeId, setEmployeeId] = useState('ALL');
   const [category, setCategory] = useState('ALL');
+  const [showIssuesOnly, setShowIssuesOnly] = useState(false);
   
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [isReorgOpen, setIsReorgOpen] = useState(false);
@@ -132,30 +133,6 @@ export default function PlanningPage() {
     [startDate, endDate, fetchPlanningData, selectedCell]
   );
 
-  // Computed state pour le filtrage
-  const filteredClients = clients.filter(c => {
-    // 1. Filtre Client
-    if (clientId !== 'ALL' && c.id !== clientId) return false;
-    
-    // 2. Filtre Catégorie / Industrie
-    if (category !== 'ALL' && c.industry !== category) return false;
-
-    // 3. Filtre de recherche texte
-    if (searchQuery && !c.name.toLowerCase().includes(searchQuery.toLowerCase()) && !c.posts.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))) {
-      return false;
-    }
-
-    // 4. Filtre Employé
-    if (employeeId !== 'ALL') {
-      const hasEmployeeAssignment = c.posts.some(p => {
-        return assignments.some(a => a.postId === p.id && a.employeeId === employeeId);
-      });
-      if (!hasEmployeeAssignment) return false;
-    }
-
-    return true;
-  });
-
   const filteredAssignments = useMemo(() => {
     let list = employeeId !== 'ALL' 
       ? assignments.filter(a => a.employeeId === employeeId) 
@@ -177,6 +154,59 @@ export default function PlanningPage() {
     });
   }, [assignments, employeeId, absences]);
 
+  // Computed state pour le filtrage
+  const filteredClients = useMemo(() => {
+    // Calcul de visibleDays localement pour tester les couvertures
+    const days: string[] = [];
+    const curr = new Date(startDate);
+    curr.setHours(0,0,0,0);
+    const last = new Date(endDate);
+    last.setHours(0,0,0,0);
+    while (curr <= last) {
+      if (curr.getDay() !== 0) { // Pas les dimanches
+        days.push(curr.toISOString().split('T')[0]);
+      }
+      curr.setDate(curr.getDate() + 1);
+    }
+
+    return clients.map(c => {
+      // Filtrer les postes de ce client
+      const filteredPosts = c.posts.filter(p => {
+        if (showIssuesOnly) {
+           let hasIssue = false;
+           for (const dateStr of days) {
+              const a = filteredAssignments.find(asg => asg.postId === p.id && asg.date.startsWith(dateStr));
+              if (!a || a.status === 'ABSENT' || a.status === 'UNCOVERED') {
+                 hasIssue = true;
+                 break;
+              }
+           }
+           if (!hasIssue) return false;
+        }
+
+        // Si on cherche un employé, il faut qu'il soit sur ce poste
+        if (employeeId !== 'ALL') {
+           const hasEmployee = assignments.some(a => a.postId === p.id && a.employeeId === employeeId);
+           if (!hasEmployee) return false;
+        }
+
+        // Filtre de recherche texte
+        if (searchQuery && !c.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+          return false;
+        }
+
+        return true;
+      });
+
+      return { ...c, posts: filteredPosts };
+    }).filter(c => {
+      if (c.posts.length === 0) return false;
+      if (clientId !== 'ALL' && c.id !== clientId) return false;
+      if (category !== 'ALL' && c.industry !== category) return false;
+      return true;
+    });
+  }, [clients, clientId, category, searchQuery, employeeId, showIssuesOnly, filteredAssignments, assignments, startDate, endDate]);
+
   return (
     <div className="flex h-full w-full overflow-hidden print:overflow-visible print:bg-white">
       <PlanningSidebar
@@ -194,6 +224,8 @@ export default function PlanningPage() {
         onCategoryChange={setCategory}
         clientsList={clients.map(c => ({ id: c.id, name: c.name }))}
         employeesList={employees}
+        showIssuesOnly={showIssuesOnly}
+        onShowIssuesOnlyChange={setShowIssuesOnly}
       />
 
       <main className="flex-1 flex flex-col overflow-hidden bg-[var(--bg-page)] print:overflow-visible print:bg-white p-6 gap-4">
