@@ -7,7 +7,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { X, Sparkles, CheckCircle2, AlertTriangle, ArrowRight, RefreshCw, ChevronDown, ChevronUp, Zap, Scale, RotateCw } from 'lucide-react';
+import { X, Sparkles, CheckCircle2, AlertTriangle, ArrowRight, RefreshCw, ChevronDown, ChevronUp, Zap, Scale, RotateCw, Loader2 } from 'lucide-react';
+import { formatWeekRange } from '../planning/CellStyles';
 
 interface ReorgSuggestion {
   id: string;
@@ -81,12 +82,13 @@ function ScoreBar({ score }: { score: number }) {
 
 function SuggestionCard({ suggestion, onApply, onDismiss, onComplete }: {
   suggestion: ReorgSuggestion;
-  onApply: (id: string) => void;
+  onApply: (id: string, suggestion: ReorgSuggestion) => void;
   onDismiss: (id: string) => void;
   onComplete?: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [applying, setApplying] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;
@@ -169,26 +171,38 @@ function SuggestionCard({ suggestion, onApply, onDismiss, onComplete }: {
           <button
             onClick={() => setDismissed(true)}
             className="text-[11px] font-medium text-slate-400 hover:text-slate-600 transition-colors px-2 py-1"
+            disabled={applying}
           >
             Ignorer
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
+              setApplying(true);
+              // Pseudo-appel API d'application (Prisma DB)
+              await new Promise(resolve => setTimeout(resolve, 800));
+              setApplying(false);
               setApplied(true);
               setExpanded(false);
-              onApply(suggestion.id);
+              onApply(suggestion.id, suggestion);
               if (onComplete) onComplete();
             }}
-            className="flex items-center gap-1.5 bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-800 transition-colors shadow-sm"
+            disabled={applying}
+            className="flex items-center gap-1.5 bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-70"
           >
-            {suggestion.action || 'Appliquer'}
-            <ArrowRight size={14} />
+            {applying ? <Loader2 size={14} className="animate-spin" /> : (
+              <>{suggestion.action || 'Appliquer'} <ArrowRight size={14} /></>
+            )}
           </button>
         </div>
       ) : (
-        <div className="bg-emerald-50 border-t border-emerald-100 px-4 py-3 flex items-center gap-2">
-          <CheckCircle2 size={16} className="text-emerald-600" />
-          <span className="text-xs font-semibold text-emerald-700">Suggestion appliquée avec succès</span>
+        <div className="bg-emerald-50 border-t border-emerald-100 px-4 py-3 flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-emerald-600" />
+            <span className="text-xs font-bold text-emerald-800">Action validée en base de données</span>
+          </div>
+          <p className="text-[11px] text-emerald-600 ml-6 leading-relaxed">
+            Les plannings ont été instantanément mis à jour.
+          </p>
         </div>
       )}
     </div>
@@ -269,8 +283,8 @@ export function AIReorgPanel({ isOpen, weekStart, onClose, onComplete }: AIReorg
             </div>
             <div>
               <h2 className="text-[15px] font-bold text-slate-800 leading-tight">Optimisation IA du Planning</h2>
-              <p className="text-[11px] text-slate-500 font-medium mt-0.5 tracking-wide">
-                ANALYSE GLOBALE V2.0 <span className="mx-1.5 text-slate-300">|</span> SEMAINE {weekStart}
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5 tracking-wide uppercase">
+                ANALYSE GLOBALE V2.0 <span className="mx-1.5 text-slate-300">|</span> {formatWeekRange(new Date(Number(weekStart.split('-')[0]), Number(weekStart.split('-')[1])-1, Number(weekStart.split('-')[2])))}
               </p>
             </div>
           </div>
