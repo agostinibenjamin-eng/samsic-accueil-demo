@@ -335,6 +335,7 @@ export async function POST(req: NextRequest) {
 
           reliabilityScore: 85, // Valeur par défaut — pas en DB phase proto
           absenceRate: 0.05,
+          hasVehicle: false,
 
           assignedShifts: dayShifts,
           recentShifts: [], // Pas chargé ici pour perf — E4/E11 non applicables
@@ -390,9 +391,13 @@ export async function POST(req: NextRequest) {
         reasoning: s.reasoning,
         criteria: s.criteria,
       })),
-      eliminated: result.eliminated.slice(0, 10).map(s => ({
+      eliminated: result.eliminated.map(s => ({
         employeeId: s.employeeId,
         employeeName: s.employeeName,
+        employeeCode: employees.find(e => e.id === s.employeeId)?.employeeCode || '',
+        firstName: employees.find(e => e.id === s.employeeId)?.firstName || '',
+        lastName: employees.find(e => e.id === s.employeeId)?.lastName || '',
+        employeeType: employees.find(e => e.id === s.employeeId)?.employeeType || '',
         totalScore: 0,
         isEligible: false,
         eliminationReasons: s.eliminationReasons,
