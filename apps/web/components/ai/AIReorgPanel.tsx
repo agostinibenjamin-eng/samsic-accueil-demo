@@ -1,7 +1,7 @@
 /**
  * AIReorgPanel — Panneau de suggestions de réorganisation planning par l'IA
  * @samsic-ai-scoring — Cascade solver, critères 8 points
- * @samsic-design-system — Charte Marine/Sable, 0-radius
+ * @samsic-design-system — Modern Fluid SaaS (rounded, soft shadows)
  * @react-patterns — Client Component, fetch données, états loading/result
  */
 'use client';
@@ -44,37 +44,37 @@ interface AIReorgPanelProps {
 
 function TypeIcon({ type }: { type: ReorgSuggestion['type'] }) {
   const map = {
-    REPLACE: { icon: RotateCw, color: 'text-[#C62828]', bg: 'bg-[#FFEBEE]' },
-    SHIFT: { icon: Scale, color: 'text-[#F57F17]', bg: 'bg-[#FFF8E1]' },
-    OPTIMIZE: { icon: Zap, color: 'text-samsic-bleu', bg: 'bg-[#E3F2FD]' },
-    ALERT: { icon: AlertTriangle, color: 'text-[#F57F17]', bg: 'bg-[#FFF8E1]' },
+    REPLACE: { icon: RotateCw, color: 'text-red-500', bg: 'bg-red-50 ring-1 ring-red-100' },
+    SHIFT: { icon: Scale, color: 'text-orange-500', bg: 'bg-orange-50 ring-1 ring-orange-100' },
+    OPTIMIZE: { icon: Zap, color: 'text-blue-500', bg: 'bg-blue-50 ring-1 ring-blue-100' },
+    ALERT: { icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-50 ring-1 ring-amber-100' },
   };
   const { icon: Icon, color, bg } = map[type];
   return (
-    <div className={`w-8 h-8 flex items-center justify-center flex-shrink-0 ${bg}`}>
-      <Icon size={15} className={color} />
+    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${bg}`}>
+      <Icon size={16} className={color} />
     </div>
   );
 }
 
 function PriorityBadge({ priority }: { priority: ReorgSuggestion['priority'] }) {
   const map = {
-    HIGH: { label: 'Priorité haute', bg: 'bg-[#FFEBEE]', text: 'text-[#C62828]' },
-    MEDIUM: { label: 'Priorité moyenne', bg: 'bg-[#FFF8E1]', text: 'text-[#F57F17]' },
-    LOW: { label: 'Priorité basse', bg: 'bg-samsic-sable-30', text: 'text-samsic-marine-50' },
+    HIGH: { label: 'Priorité haute', bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-100' },
+    MEDIUM: { label: 'Priorité moyenne', bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100' },
+    LOW: { label: 'Priorité basse', bg: 'bg-slate-100', text: 'text-slate-500', border: 'border-slate-200' },
   };
   const s = map[priority];
-  return <span className={`text-xs font-body font-bold px-2 py-0.5 ${s.bg} ${s.text}`}>{s.label}</span>;
+  return <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${s.bg} ${s.text} ${s.border}`}>{s.label}</span>;
 }
 
 function ScoreBar({ score }: { score: number }) {
-  const color = score >= 80 ? '#2E7D32' : score >= 65 ? '#F57F17' : '#C62828';
+  const color = score >= 80 ? '#10b981' : score >= 65 ? '#f59e0b' : '#ef4444'; // emerald, amber, red
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-samsic-sable-50">
-        <div className="h-1.5" style={{ width: `${score}%`, backgroundColor: color }} />
+      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${score}%`, backgroundColor: color }} />
       </div>
-      <span className="text-xs font-mono font-bold" style={{ color }}>{score}/100</span>
+      <span className="text-[10px] font-bold" style={{ color }}>{score}/100</span>
     </div>
   );
 }
@@ -92,30 +92,30 @@ function SuggestionCard({ suggestion, onApply, onDismiss, onComplete }: {
   if (dismissed) return null;
 
   return (
-    <div className={`border transition-all ${applied ? 'border-[#2E7D32] bg-[#F1F8E9]' : 'border-samsic-sable-50 bg-white'}`}>
+    <div className={`rounded-xl border transition-all duration-300 overflow-hidden ${applied ? 'border-emerald-200 bg-emerald-50/50 scale-[0.98]' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'}`}>
       {/* Card header */}
       <div className="p-4">
         <div className="flex items-start gap-3">
           <TypeIcon type={suggestion.type} />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-1">
-              <p className="text-sm font-body font-bold text-samsic-marine leading-tight">{suggestion.title}</p>
+              <p className="text-sm font-bold text-slate-800 leading-tight">{suggestion.title}</p>
               <PriorityBadge priority={suggestion.priority} />
             </div>
-            <p className="text-xs font-body text-samsic-marine-80 leading-relaxed">{suggestion.description}</p>
+            <p className="text-xs text-slate-500 leading-relaxed mt-1.5">{suggestion.description}</p>
           </div>
         </div>
 
         {/* Score + impact */}
-        <div className="mt-3 pl-11">
-          <div className="mb-2">
-            <p className="text-xs text-samsic-marine-50 font-body mb-1">Score IA de la suggestion</p>
+        <div className="mt-4 pl-12 flex justify-between items-end">
+          <div className="flex-1 mr-4">
+            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-1.5">Score de confiance IA</p>
             <ScoreBar score={suggestion.score} />
           </div>
           {suggestion.estimatedSaving && (
-            <p className="text-xs font-body text-samsic-marine-50">
-              💡 {suggestion.estimatedSaving}
-            </p>
+            <div className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+              <Sparkles size={10} /> {suggestion.estimatedSaving}
+            </div>
           )}
         </div>
 
@@ -123,33 +123,41 @@ function SuggestionCard({ suggestion, onApply, onDismiss, onComplete }: {
         {!applied && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="mt-3 ml-11 flex items-center gap-1 text-xs font-body text-samsic-bleu hover:text-samsic-marine transition-colors"
+            className="mt-3 pl-12 flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
           >
-            {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-            {expanded ? 'Moins de détails' : 'Plus de détails'}
+            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {expanded ? 'Masquer les détails' : 'Voir le détail stratégique'}
           </button>
         )}
       </div>
 
       {/* Expanded detail */}
-      {expanded && (
-        <div className="px-4 pb-4 ml-11">
-          <div className="bg-samsic-sable-30 p-3 text-xs font-body text-samsic-marine-80 whitespace-pre-line leading-relaxed border-l-2 border-samsic-bleu">
+      {expanded && !applied && (
+        <div className="px-5 pb-5 pl-[60px] pt-1 border-t border-slate-100 bg-slate-50/50">
+          <div className="mt-4 p-3 rounded-lg bg-white border border-slate-100 text-[11px] text-slate-600 whitespace-pre-line leading-relaxed shadow-sm">
             {suggestion.detail}
           </div>
           {/* Affected entities */}
-          <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="mt-4 grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-samsic-marine-50 mb-1 font-body font-semibold uppercase tracking-wider">Postes concernés</p>
-              {suggestion.affectedPosts.map((p, i) => (
-                <p key={i} className="text-xs font-body text-samsic-marine">· {p}</p>
-              ))}
+              <p className="text-[10px] text-slate-400 mb-2 font-bold uppercase tracking-wider">Poste(s) impacté(s)</p>
+              <div className="space-y-1">
+                {suggestion.affectedPosts.map((p, i) => (
+                  <div key={i} className="flex items-center gap-2 text-[11px] text-slate-700 font-medium">
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300" /> {p}
+                  </div>
+                ))}
+              </div>
             </div>
             <div>
-              <p className="text-xs text-samsic-marine-50 mb-1 font-body font-semibold uppercase tracking-wider">Agents concernés</p>
-              {suggestion.affectedEmployees.map((e, i) => (
-                <p key={i} className="text-xs font-body text-samsic-marine">· {e}</p>
-              ))}
+              <p className="text-[10px] text-slate-400 mb-2 font-bold uppercase tracking-wider">Agent(s) impacté(s)</p>
+              <div className="space-y-1">
+                {suggestion.affectedEmployees.map((e, i) => (
+                  <div key={i} className="flex items-center gap-2 text-[11px] text-slate-700 font-medium">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-300" /> {e}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -157,10 +165,10 @@ function SuggestionCard({ suggestion, onApply, onDismiss, onComplete }: {
 
       {/* Action buttons */}
       {!applied ? (
-        <div className="border-t border-samsic-sable-50 px-4 py-3 flex items-center justify-between">
+        <div className="bg-slate-50 border-t border-slate-100 px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => setDismissed(true)}
-            className="text-xs font-body text-samsic-marine-50 hover:text-samsic-marine transition-colors"
+            className="text-[11px] font-medium text-slate-400 hover:text-slate-600 transition-colors px-2 py-1"
           >
             Ignorer
           </button>
@@ -171,16 +179,16 @@ function SuggestionCard({ suggestion, onApply, onDismiss, onComplete }: {
               onApply(suggestion.id);
               if (onComplete) onComplete();
             }}
-            className="flex items-center gap-2 bg-samsic-marine text-white px-4 py-2 text-xs font-body font-bold hover:bg-samsic-marine-80 transition-colors"
+            className="flex items-center gap-1.5 bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-800 transition-colors shadow-sm"
           >
             {suggestion.action || 'Appliquer'}
-            <ArrowRight size={12} />
+            <ArrowRight size={14} />
           </button>
         </div>
       ) : (
-        <div className="border-t border-[#2E7D32] px-4 py-3 flex items-center gap-2 bg-[#F1F8E9]">
-          <CheckCircle2 size={14} className="text-[#2E7D32]" />
-          <span className="text-xs font-body font-bold text-[#2E7D32]">Appliqué — Planning mis à jour</span>
+        <div className="bg-emerald-50 border-t border-emerald-100 px-4 py-3 flex items-center gap-2">
+          <CheckCircle2 size={16} className="text-emerald-600" />
+          <span className="text-xs font-semibold text-emerald-700">Suggestion appliquée avec succès</span>
         </div>
       )}
     </div>
@@ -196,32 +204,33 @@ export function AIReorgPanel({ isOpen, weekStart, onClose, onComplete }: AIReorg
   const [appliedCount, setAppliedCount] = useState(0);
 
   const ANALYSIS_STEPS = [
-    'Chargement des données planning…',
-    'Analyse des 35 postes actifs…',
-    'Scoring 44 agents via 16 critères v2.0…',
-    'Calcul des réaffectations en chaîne…',
-    'Identification des opportunités…',
-    'Génération du rapport…',
+    'Synchronisation avec la base PostgreSQL…',
+    'Analyse des postes couverts et découverts…',
+    'Vérification des taux horaires et alertes légales…',
+    'Croisement avec le registre des absences RH…',
+    'Identification des optimisations possibles…',
+    'Génération du rapport et scoring final…',
   ];
 
   const runAnalysis = useCallback(async () => {
     setState('loading');
     setAnalysisStep(0);
 
-    // Simulate step-by-step analysis
+    // Simulate step-by-step analysis visual
     for (let i = 0; i < ANALYSIS_STEPS.length; i++) {
-      await new Promise(r => setTimeout(r, 350));
+      await new Promise(r => setTimeout(r, 450));
       setAnalysisStep(i + 1);
     }
 
     try {
-      const res = await fetch(`/api/ai/reorg?weekStart=${weekStart}`);
+      // Pour éviter le cache, on ajoute un query param random
+      const res = await fetch(`/api/ai/reorg?weekStart=${weekStart}&_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setResult(data);
       }
     } catch {
-      // Fallback: empty result
+      // Fallback in case of err
     }
     setState('done');
   }, [weekStart]);
@@ -245,98 +254,123 @@ export function AIReorgPanel({ isOpen, weekStart, onClose, onComplete }: AIReorg
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-samsic-marine/30 z-30 transition-opacity"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
 
-      {/* Panel */}
-      <div className="fixed right-0 top-0 h-full w-[480px] max-w-[95vw] bg-samsic-sable-30 z-40 flex flex-col shadow-2xl transform transition-transform">
+      {/* Floating Panel modern */}
+      <div className="fixed right-2 top-2 bottom-2 w-[480px] max-w-[calc(100vw-1rem)] bg-slate-50 rounded-2xl z-50 flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-right-8 duration-300">
 
-        {/* Header */}
-        <div className="bg-samsic-marine px-6 py-5 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <Sparkles size={18} className="text-samsic-sable" />
+        {/* Header (Bright/Modern) */}
+        <div className="bg-white px-6 py-5 flex items-center justify-between flex-shrink-0 border-b border-slate-100">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-blue-50 flex flex-col items-center justify-center text-blue-600 ring-4 ring-white shadow-sm">
+              <Sparkles size={20} />
+            </div>
             <div>
-              <h2 className="text-base font-body font-bold text-white">Analyse IA — Optimisation Planning</h2>
-              <p className="text-xs text-white/60 font-body">Cascade Solver · 16 critères · Moteur v2.0 · {weekStart}</p>
+              <h2 className="text-[15px] font-bold text-slate-800 leading-tight">Optimisation IA du Planning</h2>
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5 tracking-wide">
+                ANALYSE GLOBALE V2.0 <span className="mx-1.5 text-slate-300">|</span> SEMAINE {weekStart}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-colors">
-            <X size={18} />
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors">
+            <X size={16} />
           </button>
         </div>
 
         {/* Loading state */}
         {state === 'loading' && (
-          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8">
-            <div className="w-16 h-16 border-2 border-samsic-sable border-t-samsic-bleu animate-spin" />
-            <div className="text-center">
-              <p className="text-base font-body font-bold text-samsic-marine mb-1">Analyse en cours…</p>
-              <p className="text-sm font-body text-samsic-marine-50">{ANALYSIS_STEPS[Math.min(analysisStep, ANALYSIS_STEPS.length - 1)]}</p>
+          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50/50">
+            <div className="relative mb-8">
+              <div className="w-20 h-20 rounded-full border-4 border-slate-100" />
+              <div className="w-20 h-20 rounded-full border-4 border-blue-500 border-t-transparent animate-spin absolute top-0 left-0" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Sparkles size={24} className="text-blue-500 animate-pulse" />
+              </div>
             </div>
-            {/* Progress */}
-            <div className="w-full bg-samsic-sable-50 h-1">
-              <div
-                className="h-1 bg-samsic-bleu transition-all duration-500"
-                style={{ width: `${(analysisStep / ANALYSIS_STEPS.length) * 100}%` }}
-              />
+            <div className="text-center w-full max-w-sm">
+              <p className="text-[15px] font-bold text-slate-800 mb-2">Calcul des opportunités...</p>
+              <div className="h-6 overflow-hidden relative">
+                <p key={analysisStep} className="text-xs text-slate-500 font-medium animate-in fade-in slide-in-from-bottom-2 absolute w-full inset-0">
+                  {ANALYSIS_STEPS[Math.min(analysisStep, ANALYSIS_STEPS.length - 1)]}
+                </p>
+              </div>
+              
+              {/* Progress */}
+              <div className="w-full bg-slate-200 h-1.5 rounded-full mt-6 overflow-hidden">
+                <div
+                  className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                  style={{ width: `${(analysisStep / ANALYSIS_STEPS.length) * 100}%` }}
+                />
+              </div>
             </div>
-            <p className="text-xs font-body text-samsic-marine-50">{analysisStep} / {ANALYSIS_STEPS.length} étapes</p>
           </div>
         )}
 
         {/* Results state */}
         {state === 'done' && result && (
           <>
-            {/* Summary bar */}
-            <div className="bg-white border-b border-samsic-sable-50 px-6 py-4 flex-shrink-0">
-              <div className="flex items-center justify-between mb-3">
+            {/* KPI Summary bar */}
+            <div className="bg-white border-b border-slate-100 px-6 py-4 flex-shrink-0 shadow-sm z-10">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-body font-bold text-samsic-marine">
-                    {result.suggestionCount} suggestions identifiées
-                  </p>
-                  <p className="text-xs text-samsic-marine-50 font-body">{result.estimatedImpact}</p>
+                  <h3 className="text-[13px] font-bold text-slate-800 flex items-center gap-1.5">
+                    <CheckCircle2 size={16} className="text-emerald-500" />
+                    {result.suggestionCount} recommandations
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{result.estimatedImpact}</p>
                 </div>
                 <button
                   onClick={() => { setState('idle'); setTimeout(runAnalysis, 100); }}
-                  className="flex items-center gap-1 text-xs font-body text-samsic-bleu hover:text-samsic-marine transition-colors"
+                  className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
                 >
-                  <RefreshCw size={12} />
-                  Relancer
+                  <RefreshCw size={12} /> Actualiser
                 </button>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-[#FFEBEE] px-3 py-2">
-                  <p className="text-lg font-body font-black text-[#C62828]">{result.highPriorityCount}</p>
-                  <p className="text-xs font-body text-[#C62828]">Priorité haute</p>
+              
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-red-50/50 border border-red-100 rounded-xl px-3 py-2 text-center">
+                  <p className="text-xl font-black text-red-600 leading-none mb-1">{result.highPriorityCount}</p>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-red-400">Prio Haute</p>
                 </div>
-                <div className="bg-samsic-sable-30 px-3 py-2">
-                  <p className="text-lg font-body font-black text-samsic-marine">{result.totalPostsAnalyzed}</p>
-                  <p className="text-xs font-body text-samsic-marine-50">Postes analysés</p>
+                <div className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 text-center">
+                  <p className="text-xl font-black text-slate-700 leading-none mb-1">{result.totalPostsAnalyzed}</p>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Scrutés</p>
                 </div>
-                <div className="bg-samsic-sable-30 px-3 py-2">
-                  <p className="text-lg font-body font-black text-samsic-marine">{appliedCount}</p>
-                  <p className="text-xs font-body text-samsic-marine-50">Appliquées</p>
+                <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl px-3 py-2 text-center">
+                  <p className="text-xl font-black text-emerald-600 leading-none mb-1">{appliedCount}</p>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Appliqués</p>
                 </div>
               </div>
             </div>
 
             {/* Suggestions list */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-              {result.suggestions.map(suggestion => (
-                <SuggestionCard
-                  key={suggestion.id}
-                  suggestion={suggestion}
-                  onApply={() => setAppliedCount(c => c + 1)}
-                  onDismiss={() => {}}
-                />
-              ))}
+            <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
+              {result.suggestions.length > 0 ? (
+                result.suggestions.map(suggestion => (
+                  <SuggestionCard
+                    key={suggestion.id}
+                    suggestion={suggestion}
+                    onApply={() => setAppliedCount(c => c + 1)}
+                    onDismiss={() => {}}
+                  />
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center pt-10 text-center">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                    <CheckCircle2 size={32} />
+                  </div>
+                  <p className="text-sm font-bold text-slate-700">Planning optimisé</p>
+                  <p className="text-[11px] text-slate-500 mt-1 max-w-[250px]">L'IA n'a détecté aucune surcharge, trou ou incohérence sur cette période.</p>
+                </div>
+              )}
             </div>
 
             {/* Footer */}
-            <div className="bg-white border-t border-samsic-sable-50 px-6 py-3 flex-shrink-0">
-              <p className="text-xs text-samsic-marine-50 font-body text-center">
-                Moteur IA actif · Analyse basée sur 31 mois d'historique SAMSIC · &lt; 400ms
+            <div className="bg-slate-100/50 border-t border-slate-200 px-6 py-3 flex-shrink-0">
+              <p className="text-[10px] text-slate-400 font-medium text-center flex justify-center items-center gap-1.5">
+                <Zap size={10} className="text-amber-400" /> Modèle live propulsé par Prisma · &lt;600ms
               </p>
             </div>
           </>
@@ -345,3 +379,4 @@ export function AIReorgPanel({ isOpen, weekStart, onClose, onComplete }: AIReorg
     </>
   );
 }
+

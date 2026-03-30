@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Open_Sans, Roboto } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { StoreInitializer } from "@/components/layout/StoreInitializer";
+import { TopHeader } from "@/components/layout/TopHeader";
 
 const openSans = Open_Sans({ 
   subsets: ['latin'], 
@@ -20,8 +22,6 @@ export const metadata: Metadata = {
   description: "Plateforme IA de Planification",
 };
 
-import { TopHeader } from "@/components/layout/TopHeader";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={cn(openSans.variable, roboto.variable)}>
       <body className="antialiased font-body bg-[var(--bg-page)] text-[var(--text-primary)] h-screen w-screen flex flex-col overflow-hidden">
+        <StoreInitializer />
         <TopHeader />
         <div className="flex-1 w-full flex overflow-hidden">
           {children}

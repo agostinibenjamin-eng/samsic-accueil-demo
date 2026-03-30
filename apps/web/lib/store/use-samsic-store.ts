@@ -1,13 +1,13 @@
 'use client';
 /**
- * use-samsic-store — Store global persisté en localStorage
- * Permet de persister les modifications démo (fiches + acceptations IA)
+ * use-samsic-store — Store global
+ * Données chargées initialement depuis Supabase PostgreSQL
  */
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { CLIENTS_DATA, type ClientData, type ClientPost, type ClientContact } from '@/lib/data/clients-data';
-import { EMPLOYEES_DATA, type EmployeeFullProfile } from '@/lib/data/employees-data';
+import type { ClientData, ClientPost, ClientContact } from '@/lib/data/clients-data';
+import type { EmployeeFullProfile } from '@/lib/data/employees-data';
 
 // ─── Types d'actions IA persistées ───────────────────────────────────────────
 
@@ -32,6 +32,11 @@ interface SamsicStore {
   clients: ClientData[];
   acceptedSuggestions: AcceptedSuggestion[];
   totalRecoveredRevenue: number;
+  isInitialized: boolean;
+  isLoading: boolean;
+
+  // Actions
+  initializeData: () => Promise<void>;
 
   // Employee actions
   updateEmployee: (id: string, patch: Partial<EmployeeFullProfile>) => void;
@@ -62,10 +67,34 @@ interface SamsicStore {
 export const useSamsicStore = create<SamsicStore>()(
   persist(
     (set, get) => ({
-      employees: EMPLOYEES_DATA,
-      clients: CLIENTS_DATA,
+      employees: [],
+      clients: [],
       acceptedSuggestions: [],
       totalRecoveredRevenue: 0,
+      isInitialized: false,
+      isLoading: false,
+
+      initializeData: async () => {
+        // Ne pas recharger indéfiniment
+        if (get().isInitialized || get().isLoading) return;
+        set({ isLoading: true });
+        
+        try {
+          const res = await fetch('/api/store/init');
+          if (res.ok) {
+            const data = await res.json();
+            set({ 
+              employees: data.employees || [], 
+              clients: data.clients || [], 
+              isInitialized: true 
+            });
+          }
+        } catch (error) {
+          console.error('[Store] Failed to fetch DB config:', error);
+        } finally {
+          set({ isLoading: false });
+        }
+      },
 
       // ── Employee updates ──
       updateEmployee: (id, patch) =>
@@ -176,20 +205,23 @@ export const useSamsicStore = create<SamsicStore>()(
 
       resetToDefaults: () =>
         set({
-          employees: EMPLOYEES_DATA,
-          clients: CLIENTS_DATA,
+          employees: [],
+          clients: [],
           acceptedSuggestions: [],
           totalRecoveredRevenue: 0,
+          isInitialized: false,
         }),
     }),
     {
-      name: 'samsic-store-v1',
+      name: 'samsic-store-db-v1', // Changer la clé pour forcer le refetch DB
       partialize: (state) => ({
         employees: state.employees,
         clients: state.clients,
         acceptedSuggestions: state.acceptedSuggestions,
         totalRecoveredRevenue: state.totalRecoveredRevenue,
+        isInitialized: state.isInitialized,
       }),
     }
   )
 );
+

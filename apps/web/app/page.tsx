@@ -50,14 +50,14 @@ export default async function DashboardPage({
 }) {
   const selectedPeriod = searchParams?.period || 'semaine';
   const targetDateStr = searchParams?.date || '2026-03-28';
-  
+
   const weekStart = new Date(targetDateStr);
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
 
   // Prisma queries for real metrics
   const [dbAlerts, activePostsCount, assignments] = await Promise.all([
-    prisma.alert.findMany({ 
+    prisma.alert.findMany({
       where: { isResolved: false },
       orderBy: { createdAt: 'desc' }
     }),
@@ -84,9 +84,9 @@ export default async function DashboardPage({
   const totalPostsForWeek = activePostsCount * 5; // Approx 5 jours (Lun-Ven)
   const coveredPostsCount = assignments.length;
   const uncoveredPostsCount = Math.max(0, totalPostsForWeek - coveredPostsCount);
-  
+
   const coverageRate = totalPostsForWeek > 0 ? (coveredPostsCount / totalPostsForWeek) * 100 : 100;
-  
+
   const aiValidationsCount = assignments.filter(a => a.aiSuggested).length;
   const savings = aiValidationsCount * 45; // Métrique estimée ROI: 45€ par appel IA évité/optimisé
 
@@ -94,12 +94,12 @@ export default async function DashboardPage({
   const coverageChartData =
     selectedPeriod === 'semaine'
       ? [
-          { day: 'Lun 28', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: true },
-          { day: 'Mar 29', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: false },
-          { day: 'Mer 30', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: false },
-          { day: 'Jeu 31', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: false },
-          { day: 'Ven 01', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: false },
-        ]
+        { day: 'Lun 28', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: true },
+        { day: 'Mar 29', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: false },
+        { day: 'Mer 30', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: false },
+        { day: 'Jeu 31', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: false },
+        { day: 'Ven 01', coveredPosts: coveredPostsCount / 5, totalPosts: activePostsCount, coverageRate, isToday: false },
+      ]
       : buildHistoricalData(selectedPeriod, coverageRate);
 
   const kpi = { totalPosts: totalPostsForWeek, coveredPosts: coveredPostsCount, uncoveredPosts: uncoveredPostsCount };
@@ -146,7 +146,7 @@ export default async function DashboardPage({
 
           {/* Hero Metrics — 5 stat cards avec sparklines */}
           <section aria-label="Indicateurs clés CEO">
-            <HeroMetrics 
+            <HeroMetrics
               coverageRate={coverageRate}
               savings={savings}
               aiValidationsCount={aiValidationsCount}

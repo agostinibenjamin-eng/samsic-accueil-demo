@@ -2,11 +2,12 @@
  * AISuggestionPanel — Panneau latéral de suggestions IA v2
  * 16 critères (12 éliminatoires + 7 pondérés)
  * Affiche le reasoning détaillé et les motifs d'élimination
+ * @samsic-design-system — Modern Fluid SaaS (rounded, soft shadows)
  */
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { X, Check, XCircle, Cpu, ChevronDown, ChevronUp, AlertTriangle, Zap, Shield, Clock } from 'lucide-react';
+import { X, Check, XCircle, Cpu, ChevronDown, ChevronUp, AlertTriangle, Zap, Shield, Clock, Sparkles } from 'lucide-react';
 
 // ==================== TYPES v2 ====================
 
@@ -83,26 +84,26 @@ const EMPLOYEE_TYPE_LABEL: Record<string, string> = {
 };
 
 const EMPLOYEE_TYPE_COLOR: Record<string, string> = {
-  TEAM_LEADER: '#D42E12',
-  TITULAR: '#0A4DA6',
-  BACKUP: '#E87A1E',
+  TEAM_LEADER: '#ef4444',
+  TITULAR: '#3b82f6',
+  BACKUP: '#f59e0b',
 };
 
 // ==================== SUB-COMPONENTS ====================
 
 function ScoreBar({ value, max }: { value: number; max: number }) {
   const pct = max > 0 ? (value / max) * 100 : 0;
-  const color = pct >= 80 ? '#2E7D32' : pct >= 50 ? '#E87A1E' : value > 0 ? '#0078b0' : '#c2c4c7';
+  const color = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : value > 0 ? '#3b82f6' : '#cbd5e1';
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-samsic-sable-30 overflow-hidden">
+      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
         <div
-          className="h-full transition-all duration-500"
+          className="h-full rounded-full transition-all duration-1000 ease-out"
           style={{ width: `${pct}%`, backgroundColor: color }}
         />
       </div>
-      <span className="text-[10px] font-bold font-body w-10 text-right tabular-nums" style={{ color }}>
+      <span className="text-[10px] font-bold w-10 text-right tabular-nums" style={{ color }}>
         {value}/{max}
       </span>
     </div>
@@ -112,28 +113,28 @@ function ScoreBar({ value, max }: { value: number; max: number }) {
 function EliminatoryBadges({ criteria }: { criteria: ScoringCriteria }) {
   const checks = [
     { key: 'e1_languages', label: 'Langues', pass: criteria.e1_languages },
-    { key: 'e2_skills', label: 'Compétences', pass: criteria.e2_skills },
+    { key: 'e2_skills', label: 'Compét.', pass: criteria.e2_skills },
     { key: 'e3_availability', label: 'Disponibilité', pass: criteria.e3_availability },
     { key: 'e4_legalRest11h', label: 'Repos 11h', pass: criteria.e4_legalRest11h },
     { key: 'e5_maxDailyHours', label: 'Max 10h/j', pass: criteria.e5_maxDailyHours },
-    { key: 'e6_maxWeeklyHours', label: 'Max 48h/sem', pass: criteria.e6_maxWeeklyHours },
+    { key: 'e6_maxWeeklyHours', label: 'Max 48h/s', pass: criteria.e6_maxWeeklyHours },
     { key: 'e7_clientBlacklist', label: 'Blacklist', pass: criteria.e7_clientBlacklist },
     { key: 'e8_certifications', label: 'Certif.', pass: criteria.e8_certifications },
     { key: 'e9_securityClearance', label: 'Habilitation', pass: criteria.e9_securityClearance },
     { key: 'e10_geographicZone', label: 'Zone', pass: criteria.e10_geographicZone },
-    { key: 'e11_consecutiveDays', label: '6j consec.', pass: criteria.e11_consecutiveDays },
+    { key: 'e11_consecutiveDays', label: '6j conséc.', pass: criteria.e11_consecutiveDays },
     { key: 'e12_contractValidity', label: 'Contrat', pass: criteria.e12_contractValidity },
   ];
 
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-1.5">
       {checks.map(c => (
         <span
           key={c.key}
-          className={`inline-flex items-center gap-0.5 text-[9px] font-bold font-body px-1.5 py-0.5 ${
+          className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded ${
             c.pass
-              ? 'bg-[#e8f5e9] text-[#2E7D32]'
-              : 'bg-[#fce4ec] text-[#c62828]'
+              ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+              : 'bg-red-50 text-red-700 ring-1 ring-red-100'
           }`}
         >
           {c.pass ? '✓' : '✕'} {c.label}
@@ -160,32 +161,37 @@ function CandidateCard({
   const initials = `${suggestion.firstName?.[0] || '?'}${suggestion.lastName?.[0] || '?'}`.toUpperCase();
   const scoreColor =
     suggestion.totalScore >= 70
-      ? 'text-[#2E7D32]'
+      ? 'text-emerald-600'
       : suggestion.totalScore >= 40
-      ? 'text-[#E87A1E]'
-      : 'text-[#D42E12]';
+      ? 'text-amber-500'
+      : 'text-red-500';
 
-  const typeColor = EMPLOYEE_TYPE_COLOR[suggestion.employeeType] || '#0A0A0A';
+  const typeColor = EMPLOYEE_TYPE_COLOR[suggestion.employeeType] || '#0f172a';
   const hasBonus = suggestion.criteria?.p7_clientPreference > 0;
 
   return (
     <div
-      className={`border border-[#d5d0c8] ${rank === 0 ? 'border-l-4 border-l-[#2E7D32]' : ''} bg-white`}
+      className={`rounded-xl border border-slate-200 bg-white shadow-sm transition-all overflow-hidden ${rank === 0 ? 'ring-2 ring-emerald-500/20' : ''}`}
     >
       {/* Card header */}
-      <div className="px-4 py-3 flex items-center gap-3">
+      <div className="px-5 py-4 flex items-center gap-3">
         {/* Rang */}
-        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center bg-[#F5F3EF] text-xs font-bold text-[#0A0A0A] font-body">
-          {rank + 1}
+        {rank === 0 && (
+          <div className="absolute -top-1 -right-1 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow text-xs font-bold border-2 border-white z-10">
+            ★
+          </div>
+        )}
+        <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center bg-slate-100 text-slate-700 text-xs font-bold ring-1 ring-slate-200">
+          #{rank + 1}
         </div>
 
         {/* Initiales + type indicator */}
         <div className="relative">
-          <div className="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-[#0A0A0A] text-white font-bold text-sm font-body">
+          <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center bg-slate-800 text-white font-bold text-sm shadow-sm">
             {initials}
           </div>
           <div
-            className="absolute -bottom-0.5 -right-0.5 w-3 h-3"
+            className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white"
             style={{ backgroundColor: typeColor }}
             title={EMPLOYEE_TYPE_LABEL[suggestion.employeeType] || suggestion.employeeType}
           />
@@ -193,62 +199,62 @@ function CandidateCard({
 
         {/* Nom + type + bonus */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-[#0A0A0A] font-body truncate">
+          <p className="text-[15px] font-bold text-slate-800 truncate flex items-center gap-1.5">
             {suggestion.firstName} {suggestion.lastName}
-            {hasBonus && <span className="ml-1 text-[#E87A1E]">⭐</span>}
+            {hasBonus && <span className="bg-amber-100 text-amber-700 text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider">Favori</span>}
           </p>
-          <p className="text-xs text-[#6b6860] font-body">
+          <p className="text-xs text-slate-500 mt-0.5">
             {EMPLOYEE_TYPE_LABEL[suggestion.employeeType] ?? suggestion.employeeType}
             {' · '}
-            <span className="text-[#0A0A0A]">{suggestion.employeeCode}</span>
+            <span className="font-medium text-slate-600">{suggestion.employeeCode}</span>
           </p>
         </div>
 
         {/* Score */}
-        <div className={`text-2xl font-bold ${scoreColor}`} style={{ fontFamily: 'var(--font-display, system-ui)' }}>
+        <div className={`text-2xl font-black ${scoreColor} tabular-nums tracking-tight`}>
           {suggestion.totalScore}
         </div>
 
         {/* Expand toggle */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="w-7 h-7 flex items-center justify-center text-[#a09e97] hover:text-[#0A0A0A] transition-colors"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors ml-1"
         >
-          {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
       </div>
 
       {/* Expanded: critère breakdown v2 */}
       {expanded && (
-        <div className="px-4 pb-3 border-t border-[#d5d0c8] pt-3 space-y-3">
+        <div className="px-5 pb-4 border-t border-slate-100 pt-4 bg-slate-50/50">
           {/* Éliminatoires — badge row */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Shield size={10} className="text-[#6b6860]" />
-              <span className="text-[10px] font-bold text-[#6b6860] font-body uppercase tracking-wider">
-                Contrôles éliminatoires
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield size={12} className="text-slate-400" />
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                Filtres Bloquants (12)
               </span>
             </div>
             {suggestion.criteria && <EliminatoryBadges criteria={suggestion.criteria} />}
           </div>
 
           {/* Pondérés — barres */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Zap size={10} className="text-[#6b6860]" />
-              <span className="text-[10px] font-bold text-[#6b6860] font-body uppercase tracking-wider">
-                Score détaillé
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Zap size={12} className="text-slate-400" />
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                Score Analytique
               </span>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
               {WEIGHTED_CRITERIA.map(({ key, label, max, icon }) => {
                 const value = suggestion.criteria?.[key] ?? 0;
                 if (key === 'p7_clientPreference' && value === 0) return null;
                 return (
                   <div key={key}>
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[10px] text-[#6b6860] font-body">
-                        {icon} {label}
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11px] font-medium text-slate-600">
+                        {icon} <span className="ml-1">{label}</span>
                       </span>
                     </div>
                     <ScoreBar value={value} max={max} />
@@ -261,20 +267,20 @@ function CandidateCard({
           {/* Reasoning — explications IA */}
           {suggestion.reasoning && suggestion.reasoning.length > 0 && (
             <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <Cpu size={10} className="text-[#6b6860]" />
-                <span className="text-[10px] font-bold text-[#6b6860] font-body uppercase tracking-wider">
-                  Analyse IA
+              <div className="flex items-center gap-2 mb-2">
+                <Cpu size={12} className="text-blue-500" />
+                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                  Rapport IA
                 </span>
               </div>
-              <div className="space-y-0.5">
+              <div className="space-y-1 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
                 {suggestion.reasoning.slice(0, 5).map((r, i) => (
-                  <p key={i} className="text-[10px] text-[#6b6860] font-body pl-2 border-l-2 border-[#d5d0c8]">
+                  <p key={i} className="text-[11px] text-slate-700 pl-2 border-l-2 border-blue-300">
                     {r}
                   </p>
                 ))}
                 {suggestion.reasoning.length > 5 && (
-                  <p className="text-[10px] text-[#a09e97] font-body pl-2">
+                  <p className="text-[10px] text-blue-400 font-medium pl-2 mt-1">
                     +{suggestion.reasoning.length - 5} critères évalués...
                   </p>
                 )}
@@ -283,11 +289,11 @@ function CandidateCard({
           )}
 
           {/* Confiance IA */}
-          <div className="flex items-center justify-between pt-2 border-t border-[#d5d0c8]">
-            <span className="text-[10px] text-[#a09e97] font-body">
-              Confiance IA : {Math.round((suggestion.confidence || 0) * 100)}%
+          <div className="flex items-center justify-between mt-4">
+            <span className="text-[10px] text-slate-400 font-medium">
+              Confiance IA : <span className={suggestion.confidence > 0.8 ? 'text-emerald-500 font-bold' : 'text-slate-500'}>{Math.round((suggestion.confidence || 0) * 100)}%</span>
             </span>
-            <span className="text-[10px] text-[#a09e97] font-body">
+            <span className="text-[10px] text-slate-400">
               Score max: 100 + bonus
             </span>
           </div>
@@ -295,20 +301,20 @@ function CandidateCard({
       )}
 
       {/* Actions */}
-      <div className="px-4 pb-3 flex gap-2">
+      <div className="px-4 py-3 flex gap-3 border-t border-slate-100 bg-white">
         <button
           onClick={onAccept}
           disabled={isAccepting}
-          className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#0A0A0A] text-white text-xs font-bold font-body hover:bg-[#333] transition-colors disabled:opacity-60"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-900 text-white rounded-lg text-[13px] font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
-          <Check size={13} />
-          {isAccepting ? 'Affectation...' : 'Accepter'}
+          <Check size={16} />
+          {isAccepting ? 'Affectation...' : 'Valider'}
         </button>
         <button
           onClick={onRefuse}
-          className="flex items-center justify-center gap-1 px-3 py-2 border border-[#d5d0c8] text-xs font-bold text-[#0A0A0A] font-body hover:bg-[#F5F3EF] transition-colors"
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
         >
-          <XCircle size={13} />
+          <XCircle size={16} />
           Refuser
         </button>
       </div>
@@ -408,96 +414,94 @@ export function AISuggestionPanel({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/30 z-40"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Slide-in panel from right */}
+      {/* Floating Panel modern */}
       <aside
-        className="fixed top-0 right-0 h-full w-[420px] max-w-full bg-[#F5F3EF] z-50 flex flex-col shadow-2xl"
+        className="fixed top-2 right-2 bottom-2 w-[480px] max-w-[calc(100vw-1rem)] bg-slate-50 rounded-2xl z-50 flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-right-8 duration-300"
         role="dialog"
         aria-label="Suggestions IA v2"
       >
-        {/* Panel header */}
-        <div className="bg-[#0A0A0A] text-white px-5 py-4 flex-shrink-0">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <Cpu size={14} className="text-[#D42E12] flex-shrink-0" />
-                <span className="text-xs font-bold font-body text-[#D42E12] uppercase tracking-wider">
-                  Moteur IA {engineVersion}
-                </span>
-              </div>
-              <h2 className="text-base font-body font-extrabold text-white leading-tight">
+        {/* Panel header (Bright/Modern) */}
+        <div className="bg-white px-6 py-5 flex items-center justify-between flex-shrink-0 border-b border-slate-100">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-blue-50 flex flex-col items-center justify-center text-blue-600 ring-4 ring-white shadow-sm flex-shrink-0">
+              <Cpu size={20} />
+            </div>
+            <div className="flex-1 min-w-0 pr-4">
+              <h2 className="text-[15px] font-bold text-slate-800 leading-tight truncate">
                 {clientName}
               </h2>
-              <p className="text-sm text-[#a09e97] font-body mt-0.5">
-                {postName} · <span className="capitalize">{formattedDate}</span>
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">
+                {postName} <span className="mx-1 text-slate-300">|</span> <span className="capitalize">{formattedDate}</span>
               </p>
             </div>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center text-[#6b6860] hover:text-white hover:bg-[#333] transition-colors flex-shrink-0"
-            >
-              <X size={16} />
-            </button>
           </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors flex-shrink-0">
+            <X size={16} />
+          </button>
         </div>
 
         {/* IA processing info bar */}
         {!isLoading && suggestions.length > 0 && (
-          <div className="bg-[#e3f2fd] border-b border-[#90caf9] px-5 py-2 flex-shrink-0">
-            <p className="text-xs text-[#1565c0] font-body">
-              <span className="font-bold">{totalEligible} éligible{totalEligible > 1 ? 's' : ''}</span>
-              {' / '}
+          <div className="bg-blue-50/50 border-b border-blue-100 px-6 py-2.5 flex-shrink-0">
+            <p className="text-[11px] text-blue-700 font-medium flex items-center gap-1.5">
+              <span className="font-bold flex items-center gap-1"><Check size={12} className="text-emerald-500" /> {totalEligible} éligible{totalEligible > 1 ? 's' : ''}</span>
+              <span className="text-blue-300">·</span>
               <span className="font-bold">{totalScored} scorés</span>
-              {' · '}
-              <span className="font-bold">{totalEliminated} éliminés</span>
-              {' · '}
-              <Clock size={10} className="inline" /> {processingMs}ms
-              {' · '}
-              16 critères
+              <span className="text-blue-300">·</span>
+              <span className="text-slate-500">{totalEliminated} éliminés</span>
+              <span className="text-blue-300">·</span>
+              <Clock size={10} className="text-blue-400" /> {processingMs}ms
             </p>
           </div>
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
           {/* Loading */}
           {isLoading && (
-            <div className="flex flex-col items-center justify-center py-16 gap-3 text-[#6b6860]">
-              <div className="w-8 h-8 border-2 border-[#d5d0c8] border-t-[#D42E12] animate-spin" />
-              <p className="text-sm font-body">Analyse en cours…</p>
-              <p className="text-xs font-body text-[#a09e97]">
-                Scoring 44 agents sur 16 critères
-              </p>
+            <div className="flex-1 flex flex-col items-center justify-center p-12 bg-slate-50/50">
+              <div className="relative mb-6">
+                <div className="w-16 h-16 rounded-full border-4 border-slate-200" />
+                <div className="w-16 h-16 rounded-full border-4 border-blue-500 border-t-transparent animate-spin absolute top-0 left-0" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles size={20} className="text-blue-500 animate-pulse" />
+                </div>
+              </div>
+              <p className="text-[15px] font-bold text-slate-800 mb-1">Passage au crible...</p>
+              <p className="text-[12px] text-slate-500">Scoring de 44 agents sur 16 critères</p>
             </div>
           )}
 
           {/* Error */}
           {error && !isLoading && (
-            <div className="bg-[#fce4ec] border border-[#D42E12] px-4 py-3">
-              <p className="text-sm text-[#D42E12] font-body font-bold">{error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex flex-col items-center text-center">
+              <AlertTriangle size={24} className="text-red-500 mb-2" />
+              <p className="text-sm text-red-700 font-bold mb-2">{error}</p>
               <button
                 onClick={fetchSuggestions}
-                className="mt-2 text-xs text-[#D42E12] font-body underline"
+                className="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-lg transition-colors font-medium"
               >
-                Réessayer
+                Tenter à nouveau
               </button>
             </div>
           )}
 
           {/* No suggestions */}
           {!isLoading && !error && suggestions.length === 0 && (
-            <div className="bg-white border border-[#d5d0c8] px-5 py-8 text-center">
-              <AlertTriangle size={24} className="mx-auto mb-2 text-[#E87A1E]" />
-              <p className="text-[#0A0A0A] font-bold font-body text-sm mb-1">
-                Aucun candidat éligible
+            <div className="bg-white border border-slate-200 rounded-2xl px-6 py-10 text-center shadow-sm mt-4">
+              <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-orange-100">
+                <AlertTriangle size={28} />
+              </div>
+              <p className="text-slate-800 font-bold text-[15px] mb-2">
+                Aucun candidat éligible trouvé
               </p>
-              <p className="text-xs text-[#6b6860] font-body">
-                Les {totalEliminated || 44} agents ont été éliminés par les critères :
-                langues, compétences, disponibilité, repos légal, blacklist, certifications ou contrat.
+              <p className="text-[12px] text-slate-500 leading-relaxed max-w-[300px] mx-auto">
+                Les {totalEliminated || 44} agents de votre base ont tous été éliminés suite à des conflits bloquants (disponibilité, repos légal, blacklist, compétences, etc.).
               </p>
             </div>
           )}
@@ -517,9 +521,9 @@ export function AISuggestionPanel({
         </div>
 
         {/* Footer */}
-        <div className="bg-white border-t border-[#d5d0c8] px-5 py-3 flex-shrink-0">
-          <p className="text-[10px] text-[#a09e97] font-body text-center">
-            12 critères éliminatoires · 7 pondérés · Cascade Solver · Moteur {engineVersion}
+        <div className="bg-slate-100/50 border-t border-slate-200 px-6 py-3 flex-shrink-0">
+          <p className="text-[10px] text-slate-400 font-medium text-center flex justify-center items-center gap-1.5">
+            <Zap size={10} className="text-blue-400" /> Cascade Solver · Moteur {engineVersion || 'v2.0'}
           </p>
         </div>
       </aside>
