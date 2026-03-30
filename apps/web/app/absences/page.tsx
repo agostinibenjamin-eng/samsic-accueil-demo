@@ -8,8 +8,9 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { AbsencesSidebar } from '@/components/layout/AbsencesSidebar';
-import { CalendarOff, Plus, X, Check, AlertTriangle, Zap, Clock, User, Calendar, Network, Info } from 'lucide-react';
+import { CalendarOff, Plus, X, Check, AlertTriangle, Zap, Clock, User, Calendar, Network, Info, ArrowRight } from 'lucide-react';
 
 type AbsenceType = 'SICK_LEAVE' | 'PAID_LEAVE' | 'TRAINING' | 'OTHER';
 
@@ -77,31 +78,33 @@ function DeclareModal({ onClose, onDeclare }: {
   return (
     <div className="fixed inset-0 z-50 bg-samsic-marine/50 backdrop-blur-sm flex items-center justify-center" onClick={onClose}>
       <div
-        className="bg-white w-full max-w-md shadow-2xl border-l-4 border-l-danger"
+        className="bg-white w-full max-w-md shadow-2xl rounded-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
         style={{ animation: 'slideInUp 0.25s ease forwards' }}
       >
-        <div className="bg-danger px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CalendarOff size={18} className="text-white" />
-            <h3 className="text-white font-bold font-body">Déclarer une absence</h3>
+        <div className="bg-white border-b border-gray-100 px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center">
+              <CalendarOff size={16} className="text-red-500" />
+            </div>
+            <h3 className="text-samsic-marine font-display font-bold text-lg">Déclarer une absence</h3>
           </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
-            <X size={18} />
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
+            <X size={20} />
           </button>
         </div>
 
         {step === 'form' && (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div>
-              <label className="text-xs font-bold font-body text-samsic-marine uppercase tracking-wider block mb-1.5">
+              <label className="text-xs font-bold font-body text-gray-400 uppercase tracking-wider block mb-2">
                 Employé absent
               </label>
               <select
                 value={employeeId}
                 onChange={e => setEmployeeId(e.target.value)}
                 required
-                className="w-full px-3 py-2.5 text-sm border border-samsic-sable-50 bg-white text-samsic-marine font-body focus:outline-none focus:border-samsic-marine"
+                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50/50 hover:bg-white text-samsic-marine font-medium focus:outline-none focus:border-samsic-marine focus:ring-2 focus:ring-samsic-marine/10 transition-all"
               >
                 <option value="">Sélectionner un employé…</option>
                 {employees.map(e => (
@@ -112,33 +115,33 @@ function DeclareModal({ onClose, onDeclare }: {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold font-body text-samsic-marine uppercase tracking-wider block mb-1.5">
+                <label className="text-xs font-bold font-body text-gray-400 uppercase tracking-wider block mb-2">
                   Date de début
                 </label>
                 <input
                   type="date"
                   value={startDate}
                   onChange={e => setStartDate(e.target.value)}
-                  className="w-full px-3 py-2.5 text-sm border border-samsic-sable-50 bg-white text-samsic-marine font-body focus:outline-none"
+                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50/50 hover:bg-white text-samsic-marine font-medium focus:outline-none focus:border-samsic-marine focus:ring-2 focus:ring-samsic-marine/10 transition-all"
                   required
                 />
               </div>
               <div>
-                <label className="text-xs font-bold font-body text-samsic-marine uppercase tracking-wider block mb-1.5">
+                <label className="text-xs font-bold font-body text-gray-400 uppercase tracking-wider block mb-2">
                   Date de fin
                 </label>
                 <input
                   type="date"
                   value={endDate}
                   onChange={e => setEndDate(e.target.value)}
-                  className="w-full px-3 py-2.5 text-sm border border-samsic-sable-50 bg-white text-samsic-marine font-body focus:outline-none"
+                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50/50 hover:bg-white text-samsic-marine font-medium focus:outline-none focus:border-samsic-marine focus:ring-2 focus:ring-samsic-marine/10 transition-all"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold font-body text-samsic-marine uppercase tracking-wider block mb-1.5">
+              <label className="text-xs font-bold font-body text-gray-400 uppercase tracking-wider block mb-2">
                 Type d&apos;absence
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -147,10 +150,10 @@ function DeclareModal({ onClose, onDeclare }: {
                     key={t}
                     type="button"
                     onClick={() => setType(t)}
-                    className={`px-3 py-2 text-xs font-bold font-body border transition-colors text-left ${
+                    className={`px-4 py-3 rounded-lg text-sm font-bold font-body border transition-all text-left ${
                       type === t
-                        ? 'bg-samsic-marine text-white border-samsic-marine'
-                        : 'bg-white text-samsic-marine border-samsic-sable-50 hover:bg-samsic-sable-30'
+                        ? 'bg-samsic-marine/5 text-samsic-marine border-samsic-marine ring-1 ring-samsic-marine shadow-sm'
+                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                     }`}
                   >
                     {TYPE_CONFIG[t].label}
@@ -159,47 +162,47 @@ function DeclareModal({ onClose, onDeclare }: {
               </div>
             </div>
 
-            <div className="bg-samsic-sable-30 border-l-4 border-l-samsic-sable px-3 py-2 flex items-start gap-2">
-              <Info size={13} className="text-samsic-marine mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-samsic-marine font-body">
-                Une fois déclaré, le profil apparaitra absent, vous pourrez alors demander à l&apos;IA de le remplacer via le planning.
+            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
+              <Info size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-blue-800 font-medium leading-relaxed">
+                Le profil sera marqué absent dans la grille. Vous pourrez ensuite utiliser l'IA de planification pour combler les créneaux libérés.
               </p>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-danger text-white py-3 text-sm font-bold font-body tracking-wide hover:opacity-90 transition-opacity"
+              className="w-full bg-red-500 rounded-xl text-white py-3.5 text-sm font-bold font-body tracking-wide hover:bg-red-600 shadow hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
             >
-              Sauvegarder l&apos;absence
+              Enregistrer l'absence
             </button>
           </form>
         )}
 
         {step === 'saving' && (
           <div className="p-8 flex flex-col items-center justify-center gap-4">
-            <div className="w-16 h-16 bg-samsic-sable-30 flex items-center justify-center rounded-full">
-              <div className="w-8 h-8 border-3 border-samsic-sable border-t-samsic-marine animate-spin rounded-full" style={{ borderWidth: '3px' }} />
+            <div className="w-16 h-16 bg-samsic-marine/5 flex items-center justify-center rounded-full">
+              <div className="w-8 h-8 border-4 border-samsic-marine/20 border-t-samsic-marine animate-spin rounded-full" />
             </div>
-            <p className="text-samsic-marine font-bold font-body">Enregistrement en cours…</p>
+            <p className="text-samsic-marine font-bold font-display text-lg animate-pulse">Enregistrement...</p>
           </div>
         )}
 
         {step === 'done' && (
-          <div className="p-6 space-y-4">
-            <div className="bg-success/10 border-l-4 border-l-success px-4 py-3 flex flex-col gap-2">
-              <div className="flex items-center gap-3">
-                <Check size={16} className="text-success flex-shrink-0" />
-                <div>
-                  <p className="text-success font-bold font-body text-sm">Absence enregistrée avec succès</p>
-                  <p className="text-xs text-samsic-marine-50 font-body">Vos plannings ont été mis à jour.</p>
-                </div>
-              </div>
+          <div className="p-8 flex flex-col items-center text-center space-y-6">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
+              <Check size={32} className="text-emerald-500" />
+            </div>
+            <div>
+              <h4 className="text-emerald-600 font-bold font-display text-lg mb-2">Absence enregistrée</h4>
+              <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                Le planning a été mis à jour de façon globale. L'agent est marqué en rouge sur la grille.
+              </p>
             </div>
             <button
               onClick={() => { onDeclare(); onClose(); }}
-              className="w-full bg-samsic-marine text-white py-3 text-sm font-bold font-body hover:bg-samsic-marine-80 transition-colors"
+              className="w-full bg-samsic-marine rounded-xl text-white py-3.5 text-sm font-bold font-body hover:bg-samsic-marine-80 shadow transition-all"
             >
-              Fermer
+              Fermer et actualiser
             </button>
           </div>
         )}
@@ -211,6 +214,7 @@ function DeclareModal({ onClose, onDeclare }: {
 // ──────────────────────────────── PAGE ────────────────────────────────
 
 export default function AbsencesPage() {
+  const router = useRouter();
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
@@ -267,20 +271,17 @@ export default function AbsencesPage() {
         )}
 
         {/* Header */}
-        <div className="bg-white border-b border-gray-100 px-8 py-5">
-          <div className="flex items-start justify-between">
+        <div className="bg-white border-b border-gray-100 px-8 py-6 sticky top-0 z-20">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-body font-extrabold text-samsic-marine">Absences</h1>
-              <p className="text-sm text-samsic-marine-50 font-body mt-1">
-                Liste de toutes les absences déclarées.{' '}
-                <span className="text-danger font-semibold">
-                  Pour gérer les remplacements, utilisez la section Planning.
-                </span>
+              <h1 className="text-2xl font-display font-bold text-samsic-marine">Gestion des Absences</h1>
+              <p className="text-sm text-gray-500 font-medium mt-1">
+                Centralisation des déclarations d'absence et remplacements.
               </p>
             </div>
             <button
               onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 bg-danger text-white px-4 py-2.5 text-sm font-bold font-body hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 bg-red-500 rounded-xl shadow-sm text-white px-5 py-2.5 text-sm font-bold font-body hover:bg-red-600 hover:shadow transform hover:-translate-y-0.5 transition-all"
             >
               <Plus size={16} />
               Déclarer une absence
@@ -289,47 +290,61 @@ export default function AbsencesPage() {
         </div>
 
         <div className="px-8 py-6 space-y-6">
-          {/* Stats */}
           <div className="grid grid-cols-1 gap-4">
-            <div className="bg-white border border-samsic-sable-50 border-l-4 border-l-samsic-sable p-5 flex items-center gap-4">
-              <div className="text-4xl font-black font-display text-samsic-marine">{absences.length}</div>
-              <div>
-                <div className="text-xs text-samsic-marine-50 font-body uppercase tracking-wider">Total Absences</div>
-                <div className="flex items-center gap-1 mt-1">
-                  <CalendarOff size={12} className="text-samsic-marine" />
-                  <span className="text-xs font-bold font-body text-samsic-marine">
-                    Historique complet
-                  </span>
+            <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-6 flex items-center justify-between">
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 rounded-2xl bg-samsic-marine/5 flex items-center justify-center">
+                  <span className="text-3xl font-black font-display text-samsic-marine">{absences.length}</span>
+                </div>
+                <div>
+                  <h3 className="text-sm text-gray-500 font-bold font-body uppercase tracking-wider mb-1">Absences actives</h3>
+                  <div className="flex items-center gap-1.5 opacity-80">
+                    <CalendarOff size={14} className="text-samsic-marine" />
+                    <span className="text-sm font-medium font-body text-samsic-marine">
+                      Affichage de tout l'historique
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           <section>
-            <h2 className="text-sm font-bold font-body text-samsic-marine uppercase tracking-wider mb-3 flex items-center gap-2">
-              <AlertTriangle size={14} className="text-samsic-marine" />
-              Toutes les absences ({absences.length})
+            <h2 className="text-sm font-bold font-body text-samsic-marine uppercase tracking-wider mb-4 flex items-center gap-2">
+              <AlertTriangle size={15} className="text-samsic-marine" />
+              Répertoire des alertes ({absences.length})
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {absences.map(abs => {
                 const typeConf = TYPE_CONFIG[abs.type] || TYPE_CONFIG.OTHER;
                 return (
-                  <div key={abs.id} className="bg-white border border-samsic-sable-50 border-l-4 border-l-samsic-sable p-4 flex items-center justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-full bg-samsic-sable-30 flex items-center justify-center font-bold text-samsic-marine font-display shrink-0">
+                  <div key={abs.id} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow rounded-2xl p-5 flex items-center justify-between group">
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 rounded-full bg-samsic-marine/10 flex items-center justify-center font-bold text-samsic-marine font-display shrink-0">
                         {abs.employeeInitials}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                          <span className="font-bold text-samsic-marine font-body text-sm">{abs.employeeName}</span>
-                          <span className={`text-xs font-bold px-1.5 py-0.5 border ${typeConf.bg} ${typeConf.color}`}>
+                        <div className="flex items-center gap-3 flex-wrap mb-1.5">
+                          <span className="font-bold text-samsic-marine font-display text-base">{abs.employeeName}</span>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${typeConf.bg} ${typeConf.color}`}>
                             {typeConf.label}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-samsic-marine-50 font-body">
-                          <span className="flex items-center gap-1"><Calendar size={10} /> {abs.dateLabel}</span>
+                        <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
+                          <span className="flex items-center gap-1.5"><Calendar size={13} className="text-gray-400" /> {abs.dateLabel}</span>
                         </div>
                       </div>
+                    </div>
+                    
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-3">
+                       <button
+                         onClick={() => router.push(`/planning?startDate=${abs.startDate.split('T')[0]}`)}
+                         className="px-4 py-2 bg-samsic-marine/5 text-samsic-marine rounded-xl font-bold font-body text-sm hover:bg-samsic-marine hover:text-white transition-all flex items-center gap-2"
+                       >
+                         Traiter sur le Planning
+                         <ArrowRight size={14} className="opacity-70 group-hover:opacity-100 transition-opacity" />
+                       </button>
                     </div>
                   </div>
                 );
